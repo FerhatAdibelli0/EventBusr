@@ -1,63 +1,36 @@
+const EventEmitter = require("events");
 
-// EventBus Class(such as REDUX)
-
-function EventBus() {
- var eventTopics = {};
-
- this.addEventListener = function(eventName, listener) {
-  if (!eventTopics[eventName] || eventTopics[eventName].length < 1) {
-   eventTopics[eventName] = [];
+class EventBus extends EventEmitter {
+  constructor() {
+    super();
+    this.eventTopics = {};
   }
-  eventTopics[eventName].push(listener);
- };
-
- this.emitEventListeners = function(eventName, params) {
-  if (!eventTopics[eventName] || eventTopics[eventName].length < 1)
-   return;
-  eventTopics[eventName].forEach(function(listener) {
-   listener(!!params ? params : {});
-  });
- }
-
- this.removeListener = function(eventName, listener) {
-  if (!eventTopics[eventName] || eventTopics[eventName].length < 1)
-   return;
-  // delete listener by event name
-  delete eventTopics[eventName];
- };
-
- this.getListener = function(eventName){
-  return eventTopics[eventName];
- }
+  addListener = function (eventName, listener) {
+    if (
+      !this.eventTopics[eventName] ||
+      this.eventTopics[eventName].length < 1
+    ) {
+      this.eventTopics[eventName] = [];
+    }
+    this.eventTopics[eventName].push(listener);
+  };
+  emitListeners = function (eventName, params) {
+    if (!this.eventTopics[eventName] || this.eventTopics[eventName].length < 1)
+      return;
+    this.eventTopics[eventName].forEach(function (listener) {
+      listener(params ? params : {});
+    });
+  };
+  removeListener = function (eventName) {
+    if (!this.eventTopics[eventName] || this.eventTopics[eventName].length < 1)
+      return;
+    delete this.eventTopics[eventName];
+  };
+  getListener = function (eventName) {
+    return this.eventTopics[eventName];
+  };
 }
 
+const Logger = new EventBus();
 
-function test() {
-  var eventBus = new EventBus();
-  var data1 = "some data for event1";
-  var data2 = "some data for event2";
-  // add listener to event1
-  eventBus.addEventListener("event1", function (data) {
-    console.log("listener1 listen event1 -> " + data);
-  });
-
-  // add listener to event1
-  eventBus.addEventListener("event1", function (data) {
-    console.log("listener2 listen event1 -> " + data);
-  });
-
-  // add listener to event2
-  eventBus.addEventListener("event2", function (data) {
-    console.log("listener1 listen event2 -> " + data);
-  });
-
-  // add listener to event2
-  eventBus.addEventListener("event2", function (data) {
-    console.log("listener2 listen event2 -> " + data);
-  });
-
-  eventBus.emitEventListeners("event1", data1);
-  eventBus.emitEventListeners("event2", data2);
-}
-
-test();
+module.exports = Logger;
